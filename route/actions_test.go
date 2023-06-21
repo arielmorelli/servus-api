@@ -302,3 +302,51 @@ func TestFindRouteMatchParamaAndGeaders(t *testing.T) {
 		t.Fatalf("Method value should be found")
 	}
 }
+
+// DeleteRoute
+func TestDeleteRouteEmptyRoutes(t *testing.T) {
+	// given
+	Routes = make(Route)
+
+	// when + then
+	if DeleteRoute("a", "") {
+		t.Fatalf("Route should not exist")
+	}
+
+}
+
+func TestDeleteRouteMethodNotFound(t *testing.T) {
+	// given
+	Routes = make(Route)
+	Routes["a"] = make(Method)
+	Routes["a"]["get"] = make([]MethodValue, 0)
+	Routes["a"]["get"] = append(Routes["a"]["get"], MethodValue{
+		Headers:      map[string]string{},
+		Parameters:   map[string]string{},
+		ResponseCode: 200,
+		Response:     "test",
+	})
+
+	// when + then
+	if DeleteRoute("a", "POST") {
+		t.Fatalf("Method should not exist")
+	}
+}
+
+func TestDeleteRoute(t *testing.T) {
+	// given
+	Routes = make(Route)
+	Routes["a"] = make(Method)
+	Routes["a"]["get"] = make([]MethodValue, 0)
+	Routes["a"]["get"] = append(Routes["a"]["get"], MethodValue{
+		Headers:      map[string]string{},
+		Parameters:   map[string]string{},
+		ResponseCode: 200,
+		Response:     "test",
+	})
+
+	// when + then
+	if !DeleteRoute("a", "get") {
+		t.Fatalf("Method should not exist")
+	}
+}

@@ -5,33 +5,28 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/arielmorelli/servus-api/route"
 	"github.com/gin-gonic/gin"
-	"gitlab.com/arielmorelli/servus-api/route"
 )
 
-// Info struct to represent a new route
-type Info struct {
-	// json tag to de-serialize json body
-	Route        string            `json:"route"`
-	Methods      []string          `json:"methods"`
-	ResponseCode int               `json:"response_code,default=200"`
-	Headers      map[string]string `json:"headers"`
-	Parameters   map[string]string `json:"parameters"`
-	Response     any               `json:"response"`
+// RegisterSchema struct to represent a new route
+type RegisterSchema struct {
+	Route           string            `json:"route"`
+	Methods         []string          `json:"methods"`
+	ResponseCode    int               `json:"response_code,default=200"`
+	Headers         map[string]string `json:"headers"`
+	Parameters      map[string]string `json:"parameters"`
+	Response        any               `json:"response"`
+	ResponseHeaders map[string]string `json:"response_headers"`
 }
 
-func headersToMap(header http.Header) map[string]string {
-	asMap := make(map[string]string)
-
-	for name, values := range header {
-		name = strings.ToLower(name)
-		asMap[name] = strings.Join(values, ", ")
-	}
-
-	return asMap
+// DeleteSchema struct to represent a new route
+type DeleteSchema struct {
+	Route   string   `json:"route"`
+	Methods []string `json:"methods"`
 }
 
-func paramsToMap(header url.Values) map[string]string {
+func headersOrParametersToMap[K http.Header | url.Values](header K) map[string]string {
 	asMap := make(map[string]string)
 
 	for name, values := range header {
@@ -45,7 +40,7 @@ func paramsToMap(header url.Values) map[string]string {
 // RegisterAPIRoute parse the payload and stores a new route
 // This method uses gin.Context to get the payload and process it
 func RegisterAPIRoute(c *gin.Context) {
-	routeInfo := Info{
+	routeInfo := RegisterSchema{
 		ResponseCode: 200,
 	}
 	if err := c.BindJSON(&routeInfo); err != nil {
@@ -60,20 +55,40 @@ func RegisterAPIRoute(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, nil)
 }
 
-// ShowInfo returns all routes as a json
-func ShowInfo(c *gin.Context) {
+// ShowAPIInfo returns all routes as a json
+func ShowAPIInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, route.Routes)
 }
 
-// FindAndReturnRoute returns the registered values, if found, 404 otherwise
-func FindAndReturnRoute(targetRoute string, c *gin.Context) {
-	methodValue, found := route.FindRoute(targetRoute, c.Request.Method, headersToMap(c.Request.Header), paramsToMap(c.Request.URL.Query()))
+// FindAPIRoute returns the registered values, if found, 404 otherwise
+func FindAPIRoute(targetRoute string, c *gin.Context) {
+	methodValue, found := route.FindRoute(targetRoute, c.Request.Method, headersOrParametersToMap(c.Request.Header), headersOrParametersToMap(c.Request.URL.Query()))
 
 	if !found {
 		c.JSON(http.StatusNotFound, nil)
 	}
 
 	c.JSON(methodValue.ResponseCode, methodValue.Response)
+}
+
+// DeleteAPIRoute the registered values, if found, 404 otherwise
+func DeleteAPIRoute(c *gin.Context) {
+	deleteInfo := RegisterSchema{
+		Methods: []string{},
+	}
+	if err := c.BindJSON(&deleteInfo); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	if len(deleteInfo.Methods) > 0 {
+		for _, method := range deleteInfo.Methods {
+			route.DeleteRoute(deleteInfo.Route, method)
+		}
+	} else {
+		route.DeleteRoute(deleteInfo.Route, "")
+	}
+
+	c.JSON(http.StatusOK, nil)
 }
 
 // DynamicRouting is a custom routing on top of gin's routing system.
@@ -86,9 +101,13 @@ func DynamicRouting(c *gin.Context) {
 		return
 	}
 	if route == "_info" && c.Request.Method == "GET" {
-		ShowInfo(c)
+		ShowAPIInfo(c)
+		return
+	}
+	if route == "_remove" && c.Request.Method == "PUT" {
+		DeleteAPIRoute(c)
 		return
 	}
 
-	FindAndReturnRoute(route, c)
+	FindAPIRoute(route, c)
 }
