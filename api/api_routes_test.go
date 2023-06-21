@@ -7,8 +7,8 @@ import (
 	"testing"
 )
 
-func TestHeadersToMap(t *testing.T) {
-	asMap := headersToMap(http.Header{"a": []string{"a"}, "b": []string{"b", "c"}})
+func TestHeadersOrParametersToMapWithHeader(t *testing.T) {
+	asMap := headersOrParametersToMap(http.Header{"a": []string{"a"}, "b": []string{"b", "c"}})
 	if asMap["a"] != "a" {
 		t.Error(fmt.Sprint("Expected a, got ", asMap["a"]))
 	}
@@ -17,8 +17,8 @@ func TestHeadersToMap(t *testing.T) {
 	}
 }
 
-func TestParamsToMap(t *testing.T) {
-	asMap := paramsToMap(url.Values{"a": []string{"a"}, "b": []string{"b", "c"}})
+func TestHeadersOrParametersToMapWithParameters(t *testing.T) {
+	asMap := headersOrParametersToMap(url.Values{"a": []string{"a"}, "b": []string{"b", "c"}})
 	if asMap["a"] != "a" {
 		t.Error(fmt.Sprint("Expected a, got ", asMap["a"]))
 	}

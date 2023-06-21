@@ -9,11 +9,6 @@ import (
 // Routes is a global variable to store all routes
 var Routes Route = make(Route)
 
-// AsRouteName get a string and transform into a internal route name representation
-func AsRouteName(raw string) string {
-	return strings.Trim(raw, "/")
-}
-
 // RegisterRoute register a new route in the global context
 func RegisterRoute(route, method string, responseCode int, headers, params map[string]string, response any) {
 	route = AsRouteName(route)
@@ -44,22 +39,6 @@ func RegisterRoute(route, method string, responseCode int, headers, params map[s
 	log.Println("Added", route, strings.ToUpper(method))
 }
 
-func mapIsSubset(baseMap, mapToCheck map[string]string) bool {
-	// Check headers
-	for key, value := range mapToCheck {
-		key = strings.ToLower(key)
-		headerValue, exists := baseMap[key]
-		if !exists {
-			return false
-		}
-		if headerValue != value {
-			return false
-		}
-	}
-	return true
-
-}
-
 // FindRoute find route in method in registered Routes
 func FindRoute(route, method string, headers, params map[string]string) (MethodValue, bool) {
 	route = AsRouteName(route)
@@ -77,11 +56,34 @@ func FindRoute(route, method string, headers, params map[string]string) (MethodV
 
 	for _, methodValue := range Routes[route][method] {
 		fmt.Println(methodValue)
-		// Check headers
-		if mapIsSubset(headers, methodValue.Headers) && mapIsSubset(params, methodValue.Parameters) {
+		if isMapSubset(headers, methodValue.Headers) && isMapSubset(params, methodValue.Parameters) {
 			return methodValue, true
 		}
 	}
 
 	return MethodValue{}, false
+}
+
+// DeleteRoute delete a given route and a method, if provided
+func DeleteRoute(route, method string) bool {
+	route = AsRouteName(route)
+	method = strings.ToLower(method)
+
+	mapOfMethods, exists := Routes[route]
+	if !exists {
+		return false
+	}
+
+	if method == "" {
+		delete(Routes, route)
+	} else {
+		_, exists = mapOfMethods[method]
+		if !exists {
+			return false
+		}
+		delete(mapOfMethods, method)
+	}
+
+	log.Println("Deleted", route, strings.ToUpper(method))
+	return true
 }
