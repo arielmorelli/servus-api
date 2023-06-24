@@ -5,26 +5,10 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/arielmorelli/servus-api/route"
+	models "github.com/arielmorelli/servus-api/models"
+	route "github.com/arielmorelli/servus-api/route"
 	"github.com/gin-gonic/gin"
 )
-
-// RegisterSchema struct to represent a new route
-type RegisterSchema struct {
-	Route           string            `json:"route"`
-	Methods         []string          `json:"methods"`
-	ResponseCode    int               `json:"response_code,default=200"`
-	Headers         map[string]string `json:"headers"`
-	Parameters      map[string]string `json:"parameters"`
-	Response        any               `json:"response"`
-	ResponseHeaders map[string]string `json:"response_headers"`
-}
-
-// DeleteSchema struct to represent a new route
-type DeleteSchema struct {
-	Route   string   `json:"route"`
-	Methods []string `json:"methods"`
-}
 
 func headersOrParametersToMap[K http.Header | url.Values](header K) map[string]string {
 	asMap := make(map[string]string)
@@ -40,7 +24,7 @@ func headersOrParametersToMap[K http.Header | url.Values](header K) map[string]s
 // RegisterAPIRoute parse the payload and stores a new route
 // This method uses gin.Context to get the payload and process it
 func RegisterAPIRoute(c *gin.Context) {
-	routeInfo := RegisterSchema{
+	routeInfo := models.RegisterSchema{
 		ResponseCode: 200,
 	}
 	if err := c.BindJSON(&routeInfo); err != nil {
@@ -48,9 +32,10 @@ func RegisterAPIRoute(c *gin.Context) {
 		return
 	}
 
-	for _, method := range routeInfo.Methods {
-		route.RegisterRoute(routeInfo.Route, method, routeInfo.ResponseCode, routeInfo.Headers, routeInfo.Parameters, routeInfo.Response)
-	}
+	route.RegisterRoute(routeInfo)
+	// for _, method := range routeInfo.Methods {
+	// 	route.RegisterRoute(routeInfo.Route, method, routeInfo.ResponseCode, routeInfo.Headers, routeInfo.Parameters, routeInfo.Response)
+	// }
 
 	c.IndentedJSON(http.StatusOK, nil)
 }
@@ -73,22 +58,20 @@ func FindAPIRoute(targetRoute string, c *gin.Context) {
 
 // DeleteAPIRoute the registered values, if found, 404 otherwise
 func DeleteAPIRoute(c *gin.Context) {
-	deleteInfo := RegisterSchema{
+	deleteInfo := models.DeleteSchema{
 		Methods: []string{},
 	}
 	if err := c.BindJSON(&deleteInfo); err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	if len(deleteInfo.Methods) > 0 {
-		for _, method := range deleteInfo.Methods {
-			route.DeleteRoute(deleteInfo.Route, method)
-		}
+
+	if route.DeleteRoute(deleteInfo) {
+		c.JSON(http.StatusOK, nil)
 	} else {
-		route.DeleteRoute(deleteInfo.Route, "")
+		c.JSON(http.StatusNotFound, nil)
 	}
 
-	c.JSON(http.StatusOK, nil)
 }
 
 // DynamicRouting is a custom routing on top of gin's routing system.

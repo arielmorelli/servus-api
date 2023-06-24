@@ -20,5 +20,4 @@ func isMapSubset(baseMap, mapToCheck map[string]string) bool {
 		}
 	}
 	return true
-
 }

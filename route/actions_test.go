@@ -2,16 +2,22 @@ package route
 
 import (
 	"testing"
+
+	models "github.com/arielmorelli/servus-api/models"
 )
 
 // RegisterRoute
 func TestRegisterRouteSingleMethod(t *testing.T) {
 	// given
-	Routes = make(Route)
-	var emptyMap map[string]string
+	Routes = make(models.Route)
 
 	// when
-	RegisterRoute("/a", "GET", 204, emptyMap, emptyMap, "Hello World")
+	RegisterRoute(models.RegisterSchema{
+		Route:        "/a",
+		Methods:      []string{"GET"},
+		ResponseCode: 204,
+		Response:     "Hello world",
+	})
 
 	// then
 	if len(Routes) != 1 {
@@ -44,19 +50,29 @@ func TestRegisterRouteSingleMethod(t *testing.T) {
 		t.Fatalf("ResponseCode not set up correctly")
 	}
 
-	if value.Response != "Hello World" {
+	if value.Response != "Hello world" {
 		t.Fatalf("Response not set up correctly")
 	}
 }
 
 func TestRegisterRouteMultipleRoutes(t *testing.T) {
 	// given
-	Routes = make(Route)
-	var emptyMap map[string]string
+	Routes = make(models.Route)
 
 	// when
-	RegisterRoute("/a", "GET", 204, emptyMap, emptyMap, "Hello World")
-	RegisterRoute("/b", "GET", 204, emptyMap, emptyMap, "Hello World")
+	RegisterRoute(models.RegisterSchema{
+		Route:        "/a",
+		Methods:      []string{"GET"},
+		ResponseCode: 204,
+		Response:     "Hello world",
+	})
+
+	RegisterRoute(models.RegisterSchema{
+		Route:        "/b",
+		Methods:      []string{"GET"},
+		ResponseCode: 204,
+		Response:     "Hello world",
+	})
 
 	// then
 	if len(Routes) != 2 {
@@ -77,12 +93,21 @@ func TestRegisterRouteMultipleRoutes(t *testing.T) {
 
 func TestRegisterRouteMultipleMethods(t *testing.T) {
 	// given
-	Routes = make(Route)
-	var emptyMap map[string]string
+	Routes = make(models.Route)
 
 	// when
-	RegisterRoute("/a", "GET", 204, emptyMap, emptyMap, "Hello World")
-	RegisterRoute("/a", "POST", 204, emptyMap, emptyMap, "Hello World")
+	RegisterRoute(models.RegisterSchema{
+		Route:        "/a",
+		Methods:      []string{"GET"},
+		ResponseCode: 204,
+		Response:     "Hello world",
+	})
+	RegisterRoute(models.RegisterSchema{
+		Route:        "/a",
+		Methods:      []string{"POST"},
+		ResponseCode: 204,
+		Response:     "Hello world",
+	})
 
 	// then
 	if len(Routes) != 1 {
@@ -108,12 +133,22 @@ func TestRegisterRouteMultipleMethods(t *testing.T) {
 
 func TestRegisterRouteAppendEmptyHeaderAndParameterInTheEnd(t *testing.T) {
 	// given
-	Routes = make(Route)
-	var emptyMap map[string]string
+	Routes = make(models.Route)
 
 	// when
-	RegisterRoute("/a", "GET", 204, map[string]string{"a": "b"}, emptyMap, "Hello World")
-	RegisterRoute("/a", "GET", 204, emptyMap, emptyMap, "Hello World")
+	RegisterRoute(models.RegisterSchema{
+		Route:        "/a",
+		Methods:      []string{"GET"},
+		Headers:      map[string]string{"a": "b"},
+		ResponseCode: 204,
+		Response:     "Hello world",
+	})
+	RegisterRoute(models.RegisterSchema{
+		Route:        "/a",
+		Methods:      []string{"GET"},
+		ResponseCode: 204,
+		Response:     "Hello world",
+	})
 
 	// then
 	values, _ := Routes["a"]["get"]
@@ -127,12 +162,22 @@ func TestRegisterRouteAppendEmptyHeaderAndParameterInTheEnd(t *testing.T) {
 
 func TestRegisterRouteAppendMethodWithHeaderAndParameterInTheBeggining(t *testing.T) {
 	// given
-	Routes = make(Route)
-	var emptyMap map[string]string
+	Routes = make(models.Route)
 
 	// when
-	RegisterRoute("/a", "GET", 204, emptyMap, emptyMap, "Hello World")
-	RegisterRoute("/a", "GET", 204, map[string]string{"a": "b"}, emptyMap, "Hello World")
+	RegisterRoute(models.RegisterSchema{
+		Route:        "/a",
+		Methods:      []string{"GET"},
+		ResponseCode: 204,
+		Response:     "Hello world",
+	})
+	RegisterRoute(models.RegisterSchema{
+		Route:        "/a",
+		Methods:      []string{"GET"},
+		Headers:      map[string]string{"a": "b"},
+		ResponseCode: 204,
+		Response:     "Hello world",
+	})
 
 	// then
 	values, _ := Routes["a"]["get"]
@@ -146,13 +191,27 @@ func TestRegisterRouteAppendMethodWithHeaderAndParameterInTheBeggining(t *testin
 
 func TestRegisterRouteStripName(t *testing.T) {
 	// given
-	Routes = make(Route)
-	var emptyMap map[string]string
+	Routes = make(models.Route)
 
 	// when
-	RegisterRoute("/a", "GET", 204, emptyMap, emptyMap, "Hello World")
-	RegisterRoute("/b/", "GET", 204, map[string]string{"a": "b"}, emptyMap, "Hello World")
-	RegisterRoute("c", "GET", 204, map[string]string{"a": "b"}, emptyMap, "Hello World")
+	RegisterRoute(models.RegisterSchema{
+		Route:        "/a",
+		Methods:      []string{"GET"},
+		ResponseCode: 204,
+		Response:     "Hello world",
+	})
+	RegisterRoute(models.RegisterSchema{
+		Route:        "/b",
+		Methods:      []string{"GET"},
+		ResponseCode: 204,
+		Response:     "Hello world",
+	})
+	RegisterRoute(models.RegisterSchema{
+		Route:        "/c",
+		Methods:      []string{"GET"},
+		ResponseCode: 204,
+		Response:     "Hello world",
+	})
 
 	// then
 	_, exists := Routes["a"]
@@ -172,7 +231,7 @@ func TestRegisterRouteStripName(t *testing.T) {
 // FindRoute
 func TestFindRouteEmptyRoutes(t *testing.T) {
 	// given
-	Routes = make(Route)
+	Routes = make(models.Route)
 	var emptyMap map[string]string
 
 	// when
@@ -187,8 +246,8 @@ func TestFindRouteEmptyRoutes(t *testing.T) {
 
 func TestFindRouteRouteNotFound(t *testing.T) {
 	// given
-	Routes = make(Route)
-	Routes["a/b"] = make(Method)
+	Routes = make(models.Route)
+	Routes["a/b"] = make(models.Method)
 	var emptyMap map[string]string
 
 	// when
@@ -202,9 +261,9 @@ func TestFindRouteRouteNotFound(t *testing.T) {
 
 func TestFindRouteMethodNotFound(t *testing.T) {
 	// given
-	Routes = make(Route)
-	Routes["a/b"] = make(Method)
-	Routes["a/b"]["get"] = make([]MethodValue, 0)
+	Routes = make(models.Route)
+	Routes["a/b"] = make(models.Method)
+	Routes["a/b"]["get"] = make([]models.MethodValue, 0)
 	var emptyMap map[string]string
 
 	// when
@@ -218,10 +277,10 @@ func TestFindRouteMethodNotFound(t *testing.T) {
 
 func TestFindRouteWithParametersButWithoutHeaders(t *testing.T) {
 	// given
-	Routes = make(Route)
-	Routes["a"] = make(Method)
-	Routes["a"]["get"] = make([]MethodValue, 0)
-	Routes["a"]["get"] = append(Routes["a"]["get"], MethodValue{
+	Routes = make(models.Route)
+	Routes["a"] = make(models.Method)
+	Routes["a"]["get"] = make([]models.MethodValue, 0)
+	Routes["a"]["get"] = append(Routes["a"]["get"], models.MethodValue{
 		Headers:      map[string]string{"a": "a"},
 		Parameters:   map[string]string{},
 		ResponseCode: 200,
@@ -240,10 +299,10 @@ func TestFindRouteWithParametersButWithoutHeaders(t *testing.T) {
 
 func TestFindRouteWithHeaderButWithoutParameters(t *testing.T) {
 	// given
-	Routes = make(Route)
-	Routes["a"] = make(Method)
-	Routes["a"]["get"] = make([]MethodValue, 0)
-	Routes["a"]["get"] = append(Routes["a"]["get"], MethodValue{
+	Routes = make(models.Route)
+	Routes["a"] = make(models.Method)
+	Routes["a"]["get"] = make([]models.MethodValue, 0)
+	Routes["a"]["get"] = append(Routes["a"]["get"], models.MethodValue{
 		Headers:      map[string]string{},
 		Parameters:   map[string]string{"a": "a"},
 		ResponseCode: 200,
@@ -262,10 +321,10 @@ func TestFindRouteWithHeaderButWithoutParameters(t *testing.T) {
 
 func TestFindRouteWithEmptyParamaAndGeaders(t *testing.T) {
 	// given
-	Routes = make(Route)
-	Routes["a"] = make(Method)
-	Routes["a"]["get"] = make([]MethodValue, 0)
-	Routes["a"]["get"] = append(Routes["a"]["get"], MethodValue{
+	Routes = make(models.Route)
+	Routes["a"] = make(models.Method)
+	Routes["a"]["get"] = make([]models.MethodValue, 0)
+	Routes["a"]["get"] = append(Routes["a"]["get"], models.MethodValue{
 		Headers:      map[string]string{},
 		Parameters:   map[string]string{},
 		ResponseCode: 200,
@@ -284,10 +343,10 @@ func TestFindRouteWithEmptyParamaAndGeaders(t *testing.T) {
 
 func TestFindRouteMatchParamaAndGeaders(t *testing.T) {
 	// given
-	Routes = make(Route)
-	Routes["a"] = make(Method)
-	Routes["a"]["get"] = make([]MethodValue, 0)
-	Routes["a"]["get"] = append(Routes["a"]["get"], MethodValue{
+	Routes = make(models.Route)
+	Routes["a"] = make(models.Method)
+	Routes["a"]["get"] = make([]models.MethodValue, 0)
+	Routes["a"]["get"] = append(Routes["a"]["get"], models.MethodValue{
 		Headers:      map[string]string{"a": "a"},
 		Parameters:   map[string]string{"b": "b"},
 		ResponseCode: 200,
@@ -306,10 +365,14 @@ func TestFindRouteMatchParamaAndGeaders(t *testing.T) {
 // DeleteRoute
 func TestDeleteRouteEmptyRoutes(t *testing.T) {
 	// given
-	Routes = make(Route)
+	Routes = make(models.Route)
 
 	// when + then
-	if DeleteRoute("a", "") {
+	deleteSchema := models.DeleteSchema{
+		Route:   "/a",
+		Methods: []string{"GET"},
+	}
+	if DeleteRoute(deleteSchema) {
 		t.Fatalf("Route should not exist")
 	}
 
@@ -317,10 +380,10 @@ func TestDeleteRouteEmptyRoutes(t *testing.T) {
 
 func TestDeleteRouteMethodNotFound(t *testing.T) {
 	// given
-	Routes = make(Route)
-	Routes["a"] = make(Method)
-	Routes["a"]["get"] = make([]MethodValue, 0)
-	Routes["a"]["get"] = append(Routes["a"]["get"], MethodValue{
+	Routes = make(models.Route)
+	Routes["a"] = make(models.Method)
+	Routes["a"]["get"] = make([]models.MethodValue, 0)
+	Routes["a"]["get"] = append(Routes["a"]["get"], models.MethodValue{
 		Headers:      map[string]string{},
 		Parameters:   map[string]string{},
 		ResponseCode: 200,
@@ -328,17 +391,21 @@ func TestDeleteRouteMethodNotFound(t *testing.T) {
 	})
 
 	// when + then
-	if DeleteRoute("a", "POST") {
+	deleteSchema := models.DeleteSchema{
+		Route:   "/a",
+		Methods: []string{"POST"},
+	}
+	if DeleteRoute(deleteSchema) {
 		t.Fatalf("Method should not exist")
 	}
 }
 
 func TestDeleteRoute(t *testing.T) {
 	// given
-	Routes = make(Route)
-	Routes["a"] = make(Method)
-	Routes["a"]["get"] = make([]MethodValue, 0)
-	Routes["a"]["get"] = append(Routes["a"]["get"], MethodValue{
+	Routes = make(models.Route)
+	Routes["a"] = make(models.Method)
+	Routes["a"]["get"] = make([]models.MethodValue, 0)
+	Routes["a"]["get"] = append(Routes["a"]["get"], models.MethodValue{
 		Headers:      map[string]string{},
 		Parameters:   map[string]string{},
 		ResponseCode: 200,
@@ -346,7 +413,11 @@ func TestDeleteRoute(t *testing.T) {
 	})
 
 	// when + then
-	if !DeleteRoute("a", "get") {
+	deleteSchema := models.DeleteSchema{
+		Route:   "/a",
+		Methods: []string{"get"},
+	}
+	if !DeleteRoute(deleteSchema) {
 		t.Fatalf("Method should not exist")
 	}
 }
