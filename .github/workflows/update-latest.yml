@@ -1,0 +1,62 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+env:
+  TAG_NAME: pipeline
+  VERSION: 0
+
+jobs:
+  generate-release:
+    name: Upload Release Asset
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set variables
+        run: | 
+          if [[ "${GITHUB_REF##*/}" == "main" ]]; then
+            tag_name="latest"
+            version="dev - $GITHUB_SHA"
+          else
+            tag_name="$GITHUB_REF"
+            version="$GITHUB_REF"
+          fi
+          echo "TAG_NAME=$tag_name" >> $GITHUB_ENV
+          echo "VERSION=$version" >> $GITHUB_ENV
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Change build version
+        run: |
+          sed -i "s/VERSION_TAG/$VERSION/" main.go
+      - name: Build binaries
+        run: |
+          bash dev/generate-bin.sh
+      - name: Delete latest tag and release
+        uses: dev-drprasad/delete-tag-and-release@v1.0
+        continue-on-error: true
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          delete_release: true
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          release_name:  ${{ env.TAG_NAME }}
+          draft: false
+          prerelease: false
+      - name: Upload Release Assets
+        id: upload-release-assets
+        uses: dwenegar/upload-release-assets@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          release_id: ${{ steps.create_release.outputs.id }}
+          assets_path: bin/
