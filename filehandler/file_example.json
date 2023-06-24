@@ -1,0 +1,26 @@
+[
+    {
+        "route": "/a",
+        "methods": ["get"],
+        "headers": {"a": "a"},
+        "parameters": {},
+        "response": {"hello": "world"},
+        "response_code": 200
+    },
+    {
+        "route": "/a",
+        "methods": ["post"],
+        "headers": {"a": "a"},
+        "parameters": {},
+        "response": {"hello": "world"},
+        "response_code": 200
+    },
+    {
+        "route": "/b",
+        "methods": ["b"],
+        "headers": [],
+        "parameters": {},
+        "response": {"hello": "world"},
+        "response_code": 200
+    }
+]
