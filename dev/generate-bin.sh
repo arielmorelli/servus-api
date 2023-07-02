@@ -1,7 +1,6 @@
 #!/bin/bash
 
-ARCHS=(amd64 arm64 ppc64le ppc64 s390x)
-
+ARCHS=(amd64 arm64)
 
 # install dependencies
 go mod download
@@ -15,4 +14,3 @@ for target_arch in ${ARCHS[@]}
 do
 	env GOOS=linux GOARCH=${target_arch} go build -ldflags "-w" -o bin/servus-api-${target_arch}
 done
-

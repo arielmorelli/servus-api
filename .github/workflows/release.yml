@@ -13,7 +13,7 @@ env:
 
 jobs:
   generate-release:
-    name: Upload Release Asset
+    name: Create release
     runs-on: ubuntu-latest
     steps:
       - name: Set variables
@@ -35,13 +35,14 @@ jobs:
       - name: Build binaries
         run: |
           bash dev/generate-bin.sh
-      - name: Delete latest tag and release
-        uses: dev-drprasad/delete-tag-and-release@v1.0
+      - name: Delte old release
+        uses: ClementTsang/delete-tag-and-release@v0.3.1
         continue-on-error: true
         with:
+          delete_release: true # default: false
           tag_name: ${{ env.TAG_NAME }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          delete_release: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -49,7 +50,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ env.TAG_NAME }}
-          release_name:  ${{ env.TAG_NAME }}
+          release_name: ${{ env.TAG_NAME }}
           draft: false
           prerelease: false
       - name: Upload Release Assets
@@ -62,7 +63,7 @@ jobs:
           assets_path: bin/
 
   docker-release:
-    name: Upload docker image
+    name: Generate docker images
     runs-on: ubuntu-latest
     steps:
       - name: Set variables
