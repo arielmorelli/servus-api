@@ -13,6 +13,6 @@ mkdir bin
 # Build for all into to the bin folder
 for target_arch in ${ARCHS[@]}
 do
-	env GOOS=linux GOARCH=${target_arch} go build -o bin/servus-api-${target_arch}
+	env GOOS=linux GOARCH=${target_arch} go build -ldflags "-w" -o bin/servus-api-${target_arch}
 done
 

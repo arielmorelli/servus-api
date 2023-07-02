@@ -39,10 +39,10 @@ func main() {
 	// API setup
 	if !debug {
 		gin.SetMode(gin.ReleaseMode)
-		fmt.Printf("Listening and serving HTTP on localhost:%s\n", port)
+		fmt.Printf("Listening and serving HTTP on 0.0.0.0:%s\n", port)
 	}
 	router := gin.Default()
 	router.Any("/*route", api.DynamicRouting)
 
-	router.Run(fmt.Sprintf("localhost:%s", port))
+	router.Run(fmt.Sprintf("0.0.0.0:%s", port))
 }
