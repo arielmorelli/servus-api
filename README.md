@@ -6,9 +6,34 @@ The idea behind the project is to have an API that can add/remove routes in run-
 
 There is no user/access management and de-duplication of entries.
 
+## Install
+
+### Binary
+
+1. Download the binary
+
+    - For AMD64 / x86_64
+
+    `curl -Lo ./servus-api https://github.com/arielmorelli/servus-api/releases/download/latest/servus-api-amd64`
+
+    - For ARM64
+
+    `curl -Lo ./servus-api https://github.com/arielmorelli/servus-api/releases/download/latest/servus-api-arm64`
+
+2. Move the valid PATH folder
+```
+chmod +x ./servus-api
+sudo mv ./servus-api /usr/local/bin/servus-api
+```
+
+### Docker
+
+Check DockerHub: https://hub.docker.com/r/arielmorelli/servus-api
+
 ## Usage
 
 `servus-api [-p port] [-f JSONfile] [-d debugmode]`
+
 * -d, --debug         Debug mode
 * -f, --file string   Input file
 * -p, --port string   Port to run. (default "8080")
@@ -37,7 +62,6 @@ Use the flag `--file` (`-f`) with a JSON using using a list of entries using the
 
 ### Info
 Call `/_info/` with a GET to see stored routes and methods.
-
 
 ### Register
 

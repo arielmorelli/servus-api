@@ -5,7 +5,7 @@ on:
     branches:
       - main
     tags:
-      - 'v*'
+      - '*.*.*'
 
 env:
   TAG_NAME: pipeline
@@ -13,20 +13,23 @@ env:
 
 jobs:
   generate-release:
-    name: Upload Release Asset
+    name: Create release
     runs-on: ubuntu-latest
     steps:
       - name: Set variables
         run: | 
-          if [[ "${GITHUB_REF##*/}" == "main" ]]; then
+          branch=${GITHUB_REF##*/}
+          if [[ "$branch" == "main" ]]; then
             tag_name="latest"
             version="dev - $GITHUB_SHA"
           else
-            tag_name="$GITHUB_REF"
-            version="$GITHUB_REF"
+            tag_name="$branch"
+            version="$branch"
           fi
           echo "TAG_NAME=$tag_name" >> $GITHUB_ENV
           echo "VERSION=$version" >> $GITHUB_ENV
+      - name: Chore
+        run: printenv
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Change build version
@@ -35,13 +38,14 @@ jobs:
       - name: Build binaries
         run: |
           bash dev/generate-bin.sh
-      - name: Delete latest tag and release
-        uses: dev-drprasad/delete-tag-and-release@v1.0
+      - name: Delete old release
+        uses: dev-drprasad/delete-older-releases@v0.2.1
         continue-on-error: true
         with:
-          tag_name: ${{ env.TAG_NAME }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          delete_release: true
+          keep_latest: 0
+          delete_tag_pattern: ${{ env.TAG_NAME }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -49,7 +53,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ env.TAG_NAME }}
-          release_name:  ${{ env.TAG_NAME }}
+          release_name: ${{ env.TAG_NAME }}
           draft: false
           prerelease: false
       - name: Upload Release Assets
@@ -62,17 +66,18 @@ jobs:
           assets_path: bin/
 
   docker-release:
-    name: Upload docker image
+    name: Generate docker images
     runs-on: ubuntu-latest
     steps:
       - name: Set variables
         run: | 
-          if [[ "${GITHUB_REF##*/}" == "main" ]]; then
+          branch=${GITHUB_REF##*/}
+          if [[ "$branch" == "main" ]]; then
             tag_name="latest"
             version="dev - $GITHUB_SHA"
           else
-            tag_name="$GITHUB_REF"
-            version="$GITHUB_REF"
+            tag_name="$branch"
+            version="$branch"
           fi
           echo "TAG_NAME=$tag_name" >> $GITHUB_ENV
           echo "VERSION=$version" >> $GITHUB_ENV
