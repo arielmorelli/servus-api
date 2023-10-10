@@ -17,10 +17,11 @@ func RegisterRoute(routeInfo models.RegisterSchema) {
 	route := AsRouteName(routeInfo.Route)
 
 	methodValue := models.MethodValue{
-		Headers:      routeInfo.Headers,
-		Parameters:   routeInfo.Parameters,
-		ResponseCode: routeInfo.ResponseCode,
-		Response:     routeInfo.Response,
+		Headers:         routeInfo.Headers,
+		Parameters:      routeInfo.Parameters,
+		ResponseCode:    routeInfo.ResponseCode,
+		Response:        routeInfo.Response,
+		ResponseHeaders: routeInfo.ResponseHeaders,
 	}
 
 	for _, method := range routeInfo.Methods {
