@@ -22,9 +22,10 @@ type MethodValue struct {
 	// Matching variables
 	Headers    map[string]string
 	Parameters map[string]string
-	// Return value
-	ResponseCode int
-	Response     any
+	// Response value
+	ResponseCode    int
+	Response        any
+	ResponseHeaders map[string]string
 }
 
 // Method contains a method and a list of MethodValue for multiple matching for the same route

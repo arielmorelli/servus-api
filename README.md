@@ -48,7 +48,7 @@ Use the flag `--file` (`-f`) with a JSON using using a list of entries using the
 ```JSON
 [
     {
-        "route": "/rouet",
+        "route": "/route",
         "methods": ["get"],
         "response": {"hello": "world"},
         "response_code": 200
@@ -78,7 +78,7 @@ Call `/_register/` with a POST request to register a new route, or overwrite an 
 #### Example
 ```JSON
 {
-    "route": "/rouet",
+    "route": "/route",
     "methods": ["get", "post"],
     "response": {"hello": "world"},
     "response_code": 200
@@ -95,7 +95,7 @@ Call `/_remove/`  with a PUT request to remove route or a specific method for a 
 #### Example
 ```JSON
 {
-    "route": "/rouet",
+    "route": "/route",
     "methods": ["get"]
 }
 ```

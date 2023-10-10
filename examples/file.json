@@ -1,0 +1,29 @@
+[
+    {
+        "route": "/hello/csv",
+        "methods": ["get"],
+        "headers": {},
+        "parameters": {},
+        "response": "col1,col2\nhello,world",
+        "response_code": 200,
+        "response_headers": {"Content-Type": "text/csv"}
+    },
+    {
+        "route": "/hello/json",
+        "methods": ["get"],
+        "headers": {},
+        "parameters": {},
+        "response": {"hello": "world"},
+        "response_code": 200,
+        "response_headers": {"Content-Type": "application/json"}
+    },
+    {
+        "route": "/hello/plain",
+        "methods": ["get"],
+        "headers": {},
+        "parameters": {},
+        "response": "this is a plain text!",
+        "response_code": 200,
+        "response_headers": {"Content-Type": "text/plain"}
+    }
+]

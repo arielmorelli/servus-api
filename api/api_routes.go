@@ -33,9 +33,6 @@ func RegisterAPIRoute(c *gin.Context) {
 	}
 
 	route.RegisterRoute(routeInfo)
-	// for _, method := range routeInfo.Methods {
-	// 	route.RegisterRoute(routeInfo.Route, method, routeInfo.ResponseCode, routeInfo.Headers, routeInfo.Parameters, routeInfo.Response)
-	// }
 
 	c.IndentedJSON(http.StatusOK, nil)
 }
@@ -51,6 +48,10 @@ func FindAPIRoute(targetRoute string, c *gin.Context) {
 
 	if !found {
 		c.JSON(http.StatusNotFound, nil)
+	}
+
+	for headerKey, headerValue := range methodValue.ResponseHeaders {
+		c.Header(headerKey, headerValue)
 	}
 
 	c.JSON(methodValue.ResponseCode, methodValue.Response)
